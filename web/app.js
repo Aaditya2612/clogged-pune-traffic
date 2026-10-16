@@ -342,6 +342,12 @@ function commitHour() {
 // ---- tabs / panel ----
 const tabs = document.querySelectorAll(".tab");
 const panel = document.getElementById("panel");
+// one delegated listener for every clickable result row (bottlenecks, persistent)
+// so lists of thousands of segments don't each need their own handler.
+panel.addEventListener("click", (e) => {
+  const el = e.target.closest(".item");
+  if (el && el.dataset.id) focusSegment(Number(el.dataset.id));
+});
 let activeTab = "peaks";
 tabs.forEach(t => t.addEventListener("click", () => {
   tabs.forEach(x => x.classList.remove("active"));
@@ -402,7 +408,7 @@ async function renderPeaks() {
 }
 
 async function renderBottlenecks() {
-  const r = await (await fetch(`/api/bottlenecks?date=${dateStr}&hour=${hour}&mode=${mode}&filter=${bnFilter}&area=${encodeURIComponent(bnArea)}`)).json();
+  const r = await (await fetch(`/api/bottlenecks?date=${dateStr}&hour=${hour}&mode=${mode}&filter=${bnFilter}&area=${encodeURIComponent(bnArea)}&top=0`)).json();
   bnAreaCounts = r.area_counts || [];
   const modeLabel = mode === "forecast" ? "Forecast" : "Historical";
   let html = `<div class="card"><h3>Bottlenecks</h3>
@@ -421,7 +427,7 @@ async function renderBottlenecks() {
   } else {
     const total = r.count;
     const shown = r.segments.length;
-    html += `<div class="card sub"><div class="sub">${total} congested segment${total === 1 ? "" : "s"} total${bnArea ? " in " + esc(bnArea) : ""}${total > shown ? " (top " + shown + " listed)" : ""}</div>`;
+    html += `<div class="card sub"><div class="sub">${total} congested segment${total === 1 ? "" : "s"}${bnArea ? " in " + esc(bnArea) : ""}${total > shown ? " (top " + shown + " listed)" : ""}</div>`;
     r.segments.forEach(s => {
       html += `<div class="item" style="border-color:${COLORS[s.bucket]}" data-id="${s.id}">
         <div class="txt"><div class="nm">${esc(s.name || "Unnamed")}</div>
@@ -437,7 +443,6 @@ async function renderBottlenecks() {
   const areaInput = document.getElementById("bnAreaInput");
   if (areaInput) areaInput.addEventListener("input", () => renderBnAreaChips(areaInput.value));
   renderBnAreaChips("");
-  panel.querySelectorAll(".item").forEach(el => el.addEventListener("click", () => focusSegment(+el.dataset.id)));
 }
 
 function renderBnAreaChips(query) {
@@ -527,8 +532,6 @@ function renderPersistentList() {
   }
   html += `</div>`;
   box.innerHTML = html;
-  box.querySelectorAll(".item").forEach(el =>
-    el.addEventListener("click", () => focusSegment(+el.dataset.id)));
 }
 
 async function renderForecast() {

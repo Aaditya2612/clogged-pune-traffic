@@ -343,7 +343,9 @@ def bottlenecks(date: str, hour: int = 8, mode: str = "forecast",
 
     idx = np.where(mask)[0]
     if idx.size:
-        order = idx[np.argsort(-cong[idx])][:max(1, min(top, 2000))]
+        order = idx[np.argsort(-cong[idx])]
+        if top > 0:                       # top <= 0 => return every match
+            order = order[:top]
     else:
         order = np.array([], dtype=int)
     out = []
