@@ -19,6 +19,9 @@ let selectedArea = "All Pune";
 let bnFilter = "all";
 let bnArea = "";
 let bnAreaCounts = [];
+let bnData = null;
+let bnExpanded = false;
+const BN_LIMIT = 50;
 
 // per-segment state
 let lines = [];
@@ -410,8 +413,9 @@ async function renderPeaks() {
 async function renderBottlenecks() {
   const r = await (await fetch(`/api/bottlenecks?date=${dateStr}&hour=${hour}&mode=${mode}&filter=${bnFilter}&area=${encodeURIComponent(bnArea)}&top=0`)).json();
   bnAreaCounts = r.area_counts || [];
+  bnData = r;
   const modeLabel = mode === "forecast" ? "Forecast" : "Historical";
-  let html = `<div class="card"><h3>Bottlenecks</h3>
+  panel.innerHTML = `<div class="card"><h3>Bottlenecks</h3>
     <div class="kv"><span class="k">${fmtDate(r.date)} · ${r.day_name} ${hhmm(r.hour)}</span><span class="v">${modeLabel}</span></div>
     <select id="bnFilter">
       <option value="all"${bnFilter === "all" ? " selected" : ""}>Slow &amp; gridlocked</option>
@@ -421,28 +425,45 @@ async function renderBottlenecks() {
     <input id="bnAreaInput" class="search-input" type="text" autocomplete="off"
            placeholder="Filter by area…" />
     <div id="bnAreaChips" class="chip-row"></div>
-  </div>`;
-  if (!r.segments.length) {
-    html += `<div class="empty">No bottlenecks here at this time — traffic is flowing freely.</div>`;
-  } else {
-    const total = r.count;
-    const shown = r.segments.length;
-    html += `<div class="card sub"><div class="sub">${total} congested segment${total === 1 ? "" : "s"}${bnArea ? " in " + esc(bnArea) : ""}${total > shown ? " (top " + shown + " listed)" : ""}</div>`;
-    r.segments.forEach(s => {
-      html += `<div class="item" style="border-color:${COLORS[s.bucket]}" data-id="${s.id}">
+  </div><div id="bnList"></div>`;
+  const sel = document.getElementById("bnFilter");
+  if (sel) sel.addEventListener("change", () => { bnFilter = sel.value; bnExpanded = false; renderBottlenecks(); });
+  const areaInput = document.getElementById("bnAreaInput");
+  if (areaInput) areaInput.addEventListener("input", () => renderBnAreaChips(areaInput.value));
+  renderBnAreaChips("");
+  renderBottleneckList();
+}
+
+function renderBottleneckList() {
+  const box = document.getElementById("bnList");
+  if (!box || !bnData) return;
+  const rows = bnData.segments;
+  if (!rows.length) {
+    box.innerHTML = `<div class="empty">No bottlenecks here at this time — traffic is flowing freely.</div>`;
+    return;
+  }
+  const total = bnData.count;
+  const visible = bnExpanded ? rows.length : Math.min(BN_LIMIT, rows.length);
+  let html = `<div class="card"><div class="sub">${total} congested segment${total === 1 ? "" : "s"}${bnArea ? " in " + esc(bnArea) : ""}${rows.length > BN_LIMIT && !bnExpanded ? " · showing " + visible : ""}</div>`;
+  for (let k = 0; k < visible; k++) {
+    const s = rows[k];
+    html += `<div class="item" style="border-color:${COLORS[s.bucket]}" data-id="${s.id}">
         <div class="txt"><div class="nm">${esc(s.name || "Unnamed")}</div>
         <div class="sub">${esc(s.highway)} · ${s.label} · ${esc(s.area)}</div></div>
         <div class="val">${s.congestion}%</div>
       </div>`;
-    });
-    html += `</div>`;
   }
-  panel.innerHTML = html;
-  const sel = document.getElementById("bnFilter");
-  if (sel) sel.addEventListener("change", () => { bnFilter = sel.value; renderBottlenecks(); });
-  const areaInput = document.getElementById("bnAreaInput");
-  if (areaInput) areaInput.addEventListener("input", () => renderBnAreaChips(areaInput.value));
-  renderBnAreaChips("");
+  if (rows.length > BN_LIMIT) {
+    html += bnExpanded
+      ? `<button type="button" class="more-btn" id="bnLess">Show fewer (top ${BN_LIMIT})</button>`
+      : `<button type="button" class="more-btn" id="bnMore">Show all ${rows.length} segments</button>`;
+  }
+  html += `</div>`;
+  box.innerHTML = html;
+  const more = document.getElementById("bnMore");
+  if (more) more.addEventListener("click", () => { bnExpanded = true; renderBottleneckList(); });
+  const less = document.getElementById("bnLess");
+  if (less) less.addEventListener("click", () => { bnExpanded = false; renderBottleneckList(); });
 }
 
 function renderBnAreaChips(query) {
@@ -465,6 +486,7 @@ function renderBnAreaChips(query) {
 
   box.querySelectorAll(".chip").forEach(el => el.addEventListener("click", () => {
     bnArea = el.dataset.area;
+    bnExpanded = false;
     renderBottlenecks();
   }));
 }

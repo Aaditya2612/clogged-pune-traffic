@@ -127,6 +127,13 @@ button:hover { background: #2e3036; }
 .chip.active .cnt { background: #2b5486; color: #dcebff; }
 .cnt-pill { font-size: 11px; font-weight: 600; color: #cdd3db; background: #24262b; border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
 
+.more-btn {
+  width: 100%; margin-top: 6px; padding: 8px; border-radius: 8px;
+  background: #232429; border: 1px dashed #3a3c42; color: #9aa0aa;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.more-btn:hover { background: #2e3036; color: #fff; border-color: #5a5e66; }
+
 svg rect.bar { transition: filter .08s ease; }
 svg rect.bar:hover { filter: brightness(1.55) saturate(1.2); stroke: #fff; stroke-width: 1; }
 .axis { fill: #7b818b; font-size: 8px; }
