@@ -1,0 +1,7 @@
+# Runtime dependencies only (the API + static site).
+# The data pipeline (pipeline/) additionally needs pyrosm + pandas, but those
+# are NOT required to run the dashboard and are intentionally excluded so the
+# Render build stays light (pyrosm pulls in GDAL).
+fastapi==0.143.0
+uvicorn==0.54.0
+numpy==2.5.3

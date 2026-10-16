@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLOGGED — Pune Traffic</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">
+      <h1 class="logo"><img src="/clogged_logo.svg" alt="CLOGGED" /></h1>
+      <span class="tagline">Pune traffic</span>
+    </div>
+
+    <div class="control-group">
+      <div class="ctl">
+        <span class="ms-label" data-mode="history">Historical</span>
+        <div class="ms-switch" id="modeSwitch" title="Switch mode">
+          <div class="ms-knob" id="msKnob"></div>
+        </div>
+        <span class="ms-label" data-mode="forecast">Forecast</span>
+      </div>
+
+      <div class="ctl">
+        <span class="ctl-label">Date</span>
+        <div class="date-wrap">
+          <button type="button" id="prevDay" class="step" title="Previous day">&#8249;</button>
+          <input type="date" id="dateInput" />
+          <button type="button" id="nextDay" class="step" title="Next day">&#8250;</button>
+        </div>
+      </div>
+
+      <div class="ctl" title="Click or drag the hand to set the time">
+        <div id="clockWrap">
+          <svg id="clockSvg" viewBox="0 0 120 120" width="76" height="76">
+            <circle cx="60" cy="60" r="56" class="clock-face"/>
+            <g id="clockTicks"></g>
+            <line id="clockHand" x1="60" y1="60" x2="60" y2="26" class="clock-hand"/>
+            <circle cx="60" cy="60" r="4.5" class="clock-center"/>
+          </svg>
+          <div id="clockLabel">08:00</div>
+        </div>
+      </div>
+
+      <button type="button" id="nowBtn" class="now-btn">&#9679; Now</button>
+      <button type="button" id="playBtn">&#9654; Animate</button>
+    </div>
+  </header>
+
+  <div id="summaryStrip">
+    <span id="summaryDate">—</span>
+    <span class="sep">·</span>
+    <span id="summaryDist"></span>
+  </div>
+
+  <div id="layout">
+    <div id="map"></div>
+
+    <aside id="sidebar">
+      <div class="tabs">
+        <button class="tab active" data-tab="peaks">Peaks</button>
+        <button class="tab" data-tab="bottlenecks">Bottlenecks</button>
+        <button class="tab" data-tab="persistent">Persistent</button>
+        <button class="tab" data-tab="forecast">Forecast</button>
+        <button class="tab" data-tab="search">Search</button>
+      </div>
+      <div id="panel" class="panel"></div>
+    </aside>
+  </div>
+
+  <div id="detail" class="hidden">
+    <div id="detailHeader">
+      <h2 id="detailName">Segment</h2>
+      <button id="detailClose">&times;</button>
+    </div>
+    <div id="detailMeta"></div>
+    <div id="detailChart"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- secrets ---
+.env
+*.env
+
+# --- large source data ---
+# The raw OSM extract (~211 MB) exceeds GitHub's 100 MB file limit and is only
+# needed to REBUILD the dataset, not to run the app, so it is not committed.
+# Run `python pipeline/download_pbf.py` to fetch it locally when rebuilding.
+data/western-zone-latest.osm.pbf
+
+# NOTE: data/segments.geojson and data/profile.npz ARE committed — the API
+# loads them at start-up, so they must ship with the deployment.
