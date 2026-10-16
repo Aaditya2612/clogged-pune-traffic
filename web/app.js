@@ -419,7 +419,9 @@ async function renderBottlenecks() {
   if (!r.segments.length) {
     html += `<div class="empty">No bottlenecks here at this time — traffic is flowing freely.</div>`;
   } else {
-    html += `<div class="card sub"><div class="sub">${r.segments.length} congested segment${r.segments.length > 1 ? "s" : ""} shown${bnArea ? " in " + esc(bnArea) : ""}</div>`;
+    const total = r.count;
+    const shown = r.segments.length;
+    html += `<div class="card sub"><div class="sub">${total} congested segment${total === 1 ? "" : "s"} total${bnArea ? " in " + esc(bnArea) : ""}${total > shown ? " (top " + shown + " listed)" : ""}</div>`;
     r.segments.forEach(s => {
       html += `<div class="item" style="border-color:${COLORS[s.bucket]}" data-id="${s.id}">
         <div class="txt"><div class="nm">${esc(s.name || "Unnamed")}</div>
